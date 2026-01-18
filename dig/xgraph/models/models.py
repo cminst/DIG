@@ -400,8 +400,10 @@ class GCNConv(gnn.GCNConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
             elif self.__explain_flow__:
@@ -409,8 +411,10 @@ class GCNConv(gnn.GCNConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
@@ -539,8 +543,10 @@ class GINConv(gnn.GINConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
             elif self.__explain_flow__:
@@ -548,8 +554,10 @@ class GINConv(gnn.GINConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
@@ -803,8 +811,10 @@ class GCNConv_mask(gnn.GCNConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
             elif self.__explain_flow__:
@@ -812,8 +822,10 @@ class GCNConv_mask(gnn.GCNConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
@@ -942,8 +954,10 @@ class GINConv_mask(gnn.GINConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
             elif self.__explain_flow__:
@@ -951,8 +965,10 @@ class GINConv_mask(gnn.GINConv):
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                    missing = out.size(self.node_dim) - edge_mask.size(0)
+                    if missing > 0:
+                        loop = edge_mask.new_ones(missing)
+                        edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 

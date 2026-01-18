@@ -19,3 +19,7 @@ build/
 **/*.egg
 dig/auggraph/dataset/tudatasets/*
 examples/auggraph/GraphAug/results
+datasets/
+checkpoints/
+*.pth
+*.pt

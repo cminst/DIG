@@ -18,7 +18,7 @@ from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method import GNNExplainer, PGExplainer, SubgraphX, LaCoreExplainer
 from dig.xgraph.method.base_explainer import ExplainerBase
 from dig.xgraph.method.subgraphx import find_closest_node_result
-from dig.xgraph.models import GCN_3l
+from benchmarks.xgraph.gnnNets import GCNNet
 
 
 DATASET_DEFAULTS: Dict[str, Dict] = {
@@ -28,13 +28,93 @@ DATASET_DEFAULTS: Dict[str, Dict] = {
         "train_epochs": 100,
         "lr": 0.001,
         "weight_decay": 5e-4,
+        "sparsity": 0.5,
+        "gnn_params": {
+            "gnn_latent_dim": [64, 64, 64],
+            "gnn_dropout": 0.0,
+            "gnn_emb_normalization": False,
+            "gcn_adj_normalization": True,
+            "add_self_loop": True,
+            "gnn_nonlinear": "relu",
+            "readout": "mean",
+            "concate": False,
+            "fc_latent_dim": [],
+            "fc_dropout": 0.5,
+            "fc_nonlinear": "relu",
+        },
+        "explainer_params": {
+            "gnnexplainer": {
+                "epochs": 1000,
+                "lr": 0.01,
+                "coff_size": 0.001,
+                "coff_ent": 1e-5,
+            },
+            "pgexplainer": {
+                "epochs": 20,
+                "lr": 0.05,
+                "coff_size": 0.01,
+                "coff_ent": 0.01,
+                "t0": 5.0,
+                "t1": 1.0,
+                "sample_bias": 0.0,
+            },
+            "subgraphx": {
+                "max_nodes": 5,
+                "rollout": 20,
+                "min_atoms": 5,
+                "c_puct": 10.0,
+                "expand_atoms": 12,
+                "reward_method": "mc_l_shapley",
+                "building_method": "split",
+            },
+        },
     },
     "ba_2motifs": {
         "hidden_dim": 20,
         "batch_size": 64,
-        "train_epochs": 200,
+        "train_epochs": 800,
         "lr": 0.001,
         "weight_decay": 0.0,
+        "sparsity": 0.5,
+        "gnn_params": {
+            "gnn_latent_dim": [20, 20, 20],
+            "gnn_dropout": 0.0,
+            "gnn_emb_normalization": False,
+            "gcn_adj_normalization": False,
+            "add_self_loop": True,
+            "gnn_nonlinear": "relu",
+            "readout": "mean",
+            "concate": False,
+            "fc_latent_dim": [],
+            "fc_dropout": 0.0,
+            "fc_nonlinear": "relu",
+        },
+        "explainer_params": {
+            "gnnexplainer": {
+                "epochs": 100,
+                "lr": 0.02,
+                "coff_size": 0.001,
+                "coff_ent": 1e-5,
+            },
+            "pgexplainer": {
+                "epochs": 20,
+                "lr": 0.003,
+                "coff_size": 0.03,
+                "coff_ent": 5e-4,
+                "t0": 5.0,
+                "t1": 1.0,
+                "sample_bias": 0.0,
+            },
+            "subgraphx": {
+                "max_nodes": 5,
+                "rollout": 20,
+                "min_atoms": 5,
+                "c_puct": 10.0,
+                "expand_atoms": 20,
+                "reward_method": "mc_l_shapley",
+                "building_method": "split",
+            },
+        },
     },
 }
 
@@ -74,11 +154,67 @@ def split_dataset(dataset, split_ratio: Tuple[float, float, float], seed: int):
     return random_split(dataset, [num_train, num_val, num_test], generator=generator)
 
 
-def build_model(num_features: int, num_classes: int, hidden_dim: int):
-    return GCN_3l(model_level="graph",
-                  dim_node=num_features,
-                  dim_hidden=hidden_dim,
-                  num_classes=num_classes)
+def build_model(num_features: int, num_classes: int, gnn_params: Dict):
+    return GCNNet(
+        input_dim=num_features,
+        output_dim=num_classes,
+        gnn_latent_dim=gnn_params["gnn_latent_dim"],
+        gnn_dropout=gnn_params["gnn_dropout"],
+        gnn_emb_normalization=gnn_params["gnn_emb_normalization"],
+        gcn_adj_normalization=gnn_params["gcn_adj_normalization"],
+        add_self_loop=gnn_params["add_self_loop"],
+        gnn_nonlinear=gnn_params["gnn_nonlinear"],
+        readout=gnn_params["readout"],
+        concate=gnn_params["concate"],
+        fc_latent_dim=gnn_params["fc_latent_dim"],
+        fc_dropout=gnn_params["fc_dropout"],
+        fc_nonlinear=gnn_params["fc_nonlinear"],
+    )
+
+
+def apply_dataset_overrides(args, defaults: Dict):
+    expl = defaults["explainer_params"]
+    if args.sparsity is None:
+        args.sparsity = defaults["sparsity"]
+
+    if args.gnnexp_epochs is None:
+        args.gnnexp_epochs = expl["gnnexplainer"]["epochs"]
+    if args.gnnexp_lr is None:
+        args.gnnexp_lr = expl["gnnexplainer"]["lr"]
+    if args.gnnexp_coff_size is None:
+        args.gnnexp_coff_size = expl["gnnexplainer"]["coff_size"]
+    if args.gnnexp_coff_ent is None:
+        args.gnnexp_coff_ent = expl["gnnexplainer"]["coff_ent"]
+
+    if args.pg_epochs is None:
+        args.pg_epochs = expl["pgexplainer"]["epochs"]
+    if args.pg_lr is None:
+        args.pg_lr = expl["pgexplainer"]["lr"]
+    if args.pg_coff_size is None:
+        args.pg_coff_size = expl["pgexplainer"]["coff_size"]
+    if args.pg_coff_ent is None:
+        args.pg_coff_ent = expl["pgexplainer"]["coff_ent"]
+    if args.pg_t0 is None:
+        args.pg_t0 = expl["pgexplainer"]["t0"]
+    if args.pg_t1 is None:
+        args.pg_t1 = expl["pgexplainer"]["t1"]
+    if args.pg_sample_bias is None:
+        args.pg_sample_bias = expl["pgexplainer"]["sample_bias"]
+
+    if args.subgraphx_max_nodes is None:
+        args.subgraphx_max_nodes = expl["subgraphx"]["max_nodes"]
+    if args.subgraphx_rollout is None:
+        args.subgraphx_rollout = expl["subgraphx"]["rollout"]
+    if args.subgraphx_min_atoms is None:
+        args.subgraphx_min_atoms = expl["subgraphx"]["min_atoms"]
+    if args.subgraphx_c_puct is None:
+        args.subgraphx_c_puct = expl["subgraphx"]["c_puct"]
+    if args.subgraphx_expand_atoms is None:
+        args.subgraphx_expand_atoms = expl["subgraphx"]["expand_atoms"]
+    if args.subgraphx_reward_method is None:
+        args.subgraphx_reward_method = expl["subgraphx"]["reward_method"]
+    if args.subgraphx_building_method is None:
+        args.subgraphx_building_method = expl["subgraphx"]["building_method"]
 
 
 def evaluate_accuracy(model, loader, device):
@@ -190,6 +326,8 @@ def run_gnnexplainer(model, dataset, test_subset, device, args):
     explainer = GNNExplainer(model,
                              epochs=args.gnnexp_epochs,
                              lr=args.gnnexp_lr,
+                             coff_edge_size=args.gnnexp_coff_size,
+                             coff_edge_ent=args.gnnexp_coff_ent,
                              explain_graph=True)
     explainer.device = device
     x_collector = XCollector()
@@ -307,26 +445,28 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default=None, type=str)
     parser.add_argument("--train-epochs", type=int, default=None)
-    parser.add_argument("--sparsity", type=float, default=0.7)
+    parser.add_argument("--sparsity", type=float, default=None)
 
-    parser.add_argument("--gnnexp-epochs", type=int, default=100)
-    parser.add_argument("--gnnexp-lr", type=float, default=0.01)
+    parser.add_argument("--gnnexp-epochs", type=int, default=None)
+    parser.add_argument("--gnnexp-lr", type=float, default=None)
+    parser.add_argument("--gnnexp-coff-size", type=float, default=None)
+    parser.add_argument("--gnnexp-coff-ent", type=float, default=None)
 
-    parser.add_argument("--pg-epochs", type=int, default=20)
-    parser.add_argument("--pg-lr", type=float, default=0.005)
-    parser.add_argument("--pg-coff-size", type=float, default=0.01)
-    parser.add_argument("--pg-coff-ent", type=float, default=5e-4)
-    parser.add_argument("--pg-t0", type=float, default=5.0)
-    parser.add_argument("--pg-t1", type=float, default=1.0)
-    parser.add_argument("--pg-sample-bias", type=float, default=0.0)
+    parser.add_argument("--pg-epochs", type=int, default=None)
+    parser.add_argument("--pg-lr", type=float, default=None)
+    parser.add_argument("--pg-coff-size", type=float, default=None)
+    parser.add_argument("--pg-coff-ent", type=float, default=None)
+    parser.add_argument("--pg-t0", type=float, default=None)
+    parser.add_argument("--pg-t1", type=float, default=None)
+    parser.add_argument("--pg-sample-bias", type=float, default=None)
 
-    parser.add_argument("--subgraphx-max-nodes", type=int, default=10)
-    parser.add_argument("--subgraphx-rollout", type=int, default=20)
-    parser.add_argument("--subgraphx-min-atoms", type=int, default=5)
-    parser.add_argument("--subgraphx-c-puct", type=float, default=10.0)
-    parser.add_argument("--subgraphx-expand-atoms", type=int, default=14)
-    parser.add_argument("--subgraphx-reward-method", type=str, default="mc_l_shapley")
-    parser.add_argument("--subgraphx-building-method", type=str, default="zero_filling")
+    parser.add_argument("--subgraphx-max-nodes", type=int, default=None)
+    parser.add_argument("--subgraphx-rollout", type=int, default=None)
+    parser.add_argument("--subgraphx-min-atoms", type=int, default=None)
+    parser.add_argument("--subgraphx-c-puct", type=float, default=None)
+    parser.add_argument("--subgraphx-expand-atoms", type=int, default=None)
+    parser.add_argument("--subgraphx-reward-method", type=str, default=None)
+    parser.add_argument("--subgraphx-building-method", type=str, default=None)
 
     parser.add_argument("--lacore-epsilon", type=float, default=0.1)
 
@@ -347,12 +487,13 @@ def main():
         defaults = DATASET_DEFAULTS.get(dataset_name, DATASET_DEFAULTS["mutag"])
         args.hidden_dim = defaults["hidden_dim"]
         train_epochs = args.train_epochs if args.train_epochs is not None else defaults["train_epochs"]
+        apply_dataset_overrides(args, defaults)
 
         train_set, val_set, test_set = split_dataset(dataset, (0.8, 0.1, 0.1), args.seed)
         train_loader = DataLoader(train_set, batch_size=defaults["batch_size"], shuffle=True)
         val_loader = DataLoader(val_set, batch_size=defaults["batch_size"], shuffle=False)
 
-        model = build_model(dataset.num_node_features, dataset.num_classes, defaults["hidden_dim"])
+        model = build_model(dataset.num_node_features, dataset.num_classes, defaults["gnn_params"])
         model_ckpt = os.path.join(args.checkpoint_dir, dataset_name, "gcn_3l_best.pth")
         if load_checkpoint(model, model_ckpt):
             print(f"  Loaded model checkpoint: {model_ckpt}")
