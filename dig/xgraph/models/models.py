@@ -367,8 +367,8 @@ class GCNConv(gnn.GCNConv):
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
                 and not self._explain):
-            coll_dict = self._collect(self.__fused_user_args__, edge_index,
-                                         size, kwargs)
+            coll_dict = self._collect(self._fused_user_args, edge_index,
+                                          size, kwargs)
 
             msg_aggr_kwargs = self.inspector.distribute(
                 'message_and_aggregate', coll_dict)
@@ -379,8 +379,8 @@ class GCNConv(gnn.GCNConv):
 
         # Otherwise, run both functions in separation.
         elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self._collect(self.__user_args__, edge_index, size,
-                                         kwargs)
+            coll_dict = self._collect(self._user_args, edge_index, size,
+                                          kwargs)
 
             msg_kwargs = self.inspector.distribute('message', coll_dict)
             out = self.message(**msg_kwargs)
@@ -507,8 +507,8 @@ class GINConv(gnn.GINConv):
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
                 and not self._explain):
-            coll_dict = self._collect(self.__fused_user_args__, edge_index,
-                                         size, kwargs)
+            coll_dict = self._collect(self._fused_user_args, edge_index,
+                                          size, kwargs)
 
             msg_aggr_kwargs = self.inspector.distribute(
                 'message_and_aggregate', coll_dict)
@@ -519,8 +519,8 @@ class GINConv(gnn.GINConv):
 
         # Otherwise, run both functions in separation.
         elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self._collect(self.__user_args__, edge_index, size,
-                                         kwargs)
+            coll_dict = self._collect(self._user_args, edge_index, size,
+                                          kwargs)
 
             msg_kwargs = self.inspector.distribute('message', coll_dict)
             out = self.message(**msg_kwargs)
@@ -772,8 +772,8 @@ class GCNConv_mask(gnn.GCNConv):
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
                 and not self._explain):
-            coll_dict = self._collect(self.__fused_user_args__, edge_index,
-                                         size, kwargs)
+            coll_dict = self._collect(self._fused_user_args, edge_index,
+                                          size, kwargs)
 
             msg_aggr_kwargs = self.inspector.distribute(
                 'message_and_aggregate', coll_dict)
@@ -784,8 +784,8 @@ class GCNConv_mask(gnn.GCNConv):
 
         # Otherwise, run both functions in separation.
         elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self._collect(self.__user_args__, edge_index, size,
-                                         kwargs)
+            coll_dict = self._collect(self._user_args, edge_index, size,
+                                          kwargs)
 
             msg_kwargs = self.inspector.distribute('message', coll_dict)
             out = self.message(**msg_kwargs)
@@ -912,8 +912,8 @@ class GINConv_mask(gnn.GINConv):
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
                 and not self._explain):
-            coll_dict = self._collect(self.__fused_user_args__, edge_index,
-                                         size, kwargs)
+            coll_dict = self._collect(self._fused_user_args, edge_index,
+                                          size, kwargs)
 
             msg_aggr_kwargs = self.inspector.distribute(
                 'message_and_aggregate', coll_dict)
@@ -924,8 +924,8 @@ class GINConv_mask(gnn.GINConv):
 
         # Otherwise, run both functions in separation.
         elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self._collect(self.__user_args__, edge_index, size,
-                                         kwargs)
+            coll_dict = self._collect(self._user_args, edge_index, size,
+                                          kwargs)
 
             msg_kwargs = self.inspector.distribute('message', coll_dict)
             out = self.message(**msg_kwargs)
