@@ -58,7 +58,7 @@ class SynGraphDataset(InMemoryDataset):
     def __init__(self, root, name, transform=None, pre_transform=None):
         self.name = name.lower()
         super(SynGraphDataset, self).__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     @property
     def raw_dir(self):
@@ -193,7 +193,7 @@ class BA_LRP(InMemoryDataset):
         self.name = 'ba_lrp'
         self.num_per_class = num_per_class
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     @property
     def raw_dir(self):
@@ -215,7 +215,7 @@ class BA_LRP(InMemoryDataset):
         url = self.url
         path = download_url(url, self.raw_dir)
         # shutil.move(path, path.replace('ba_lrp_old.pt', 'raw.pt'))
-        data_list = torch.load(path)
+        data_list = torch.load(path, weights_only=False)
         pyg_data_list = []
         for data in data_list:
             pyg_data_list.append(Data(x=data['x'], edge_index=data['edge_index'], y=data['y']))

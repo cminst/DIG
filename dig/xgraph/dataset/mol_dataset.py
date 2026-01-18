@@ -160,7 +160,7 @@ class MoleculeDataset(InMemoryDataset):
         assert self.name in self.names.keys()
         super(MoleculeDataset, self).__init__(root, transform, pre_transform,
                                               pre_filter)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     @property
     def raw_dir(self):
