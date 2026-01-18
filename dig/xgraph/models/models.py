@@ -7,6 +7,7 @@ Author: Shurui Gui
 """
 
 import torch
+import inspect
 import torch.nn as nn
 import torch_geometric.nn as gnn
 from torch_geometric.utils.loop import add_self_loops, remove_self_loops
@@ -46,6 +47,13 @@ class GNNBasic(torch.nn.Module):
             x, edge_index, batch = data.x, data.edge_index, data.batch
 
         return x, edge_index, batch
+
+
+def _select_args(fn, coll_dict):
+    params = inspect.signature(fn).parameters
+    if any(p.kind == p.VAR_KEYWORD for p in params.values()):
+        return coll_dict
+    return {k: coll_dict[k] for k in params if k in coll_dict}
 
 
 class GCN_3l(GNNBasic):
@@ -370,11 +378,10 @@ class GCNConv(gnn.GCNConv):
             coll_dict = self._collect(self._fused_user_args, edge_index,
                                           size, kwargs)
 
-            msg_aggr_kwargs = self.inspector.distribute(
-                'message_and_aggregate', coll_dict)
+            msg_aggr_kwargs = _select_args(self.message_and_aggregate, coll_dict)
             out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
         # Otherwise, run both functions in separation.
@@ -382,7 +389,7 @@ class GCNConv(gnn.GCNConv):
             coll_dict = self._collect(self._user_args, edge_index, size,
                                           kwargs)
 
-            msg_kwargs = self.inspector.distribute('message', coll_dict)
+            msg_kwargs = _select_args(self.message, coll_dict)
             out = self.message(**msg_kwargs)
 
             # For `GNNExplainer`, we require a separate message and aggregate
@@ -407,10 +414,10 @@ class GCNConv(gnn.GCNConv):
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
-            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+            aggr_kwargs = _select_args(self.aggregate, coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
 
@@ -510,11 +517,10 @@ class GINConv(gnn.GINConv):
             coll_dict = self._collect(self._fused_user_args, edge_index,
                                           size, kwargs)
 
-            msg_aggr_kwargs = self.inspector.distribute(
-                'message_and_aggregate', coll_dict)
+            msg_aggr_kwargs = _select_args(self.message_and_aggregate, coll_dict)
             out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
         # Otherwise, run both functions in separation.
@@ -522,7 +528,7 @@ class GINConv(gnn.GINConv):
             coll_dict = self._collect(self._user_args, edge_index, size,
                                           kwargs)
 
-            msg_kwargs = self.inspector.distribute('message', coll_dict)
+            msg_kwargs = _select_args(self.message, coll_dict)
             out = self.message(**msg_kwargs)
 
             # For `GNNExplainer`, we require a separate message and aggregate
@@ -547,10 +553,10 @@ class GINConv(gnn.GINConv):
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
-            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+            aggr_kwargs = _select_args(self.aggregate, coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
 
@@ -775,11 +781,10 @@ class GCNConv_mask(gnn.GCNConv):
             coll_dict = self._collect(self._fused_user_args, edge_index,
                                           size, kwargs)
 
-            msg_aggr_kwargs = self.inspector.distribute(
-                'message_and_aggregate', coll_dict)
+            msg_aggr_kwargs = _select_args(self.message_and_aggregate, coll_dict)
             out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
         # Otherwise, run both functions in separation.
@@ -787,7 +792,7 @@ class GCNConv_mask(gnn.GCNConv):
             coll_dict = self._collect(self._user_args, edge_index, size,
                                           kwargs)
 
-            msg_kwargs = self.inspector.distribute('message', coll_dict)
+            msg_kwargs = _select_args(self.message, coll_dict)
             out = self.message(**msg_kwargs)
 
             # For `GNNExplainer`, we require a separate message and aggregate
@@ -812,10 +817,10 @@ class GCNConv_mask(gnn.GCNConv):
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
-            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+            aggr_kwargs = _select_args(self.aggregate, coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
 
@@ -915,11 +920,10 @@ class GINConv_mask(gnn.GINConv):
             coll_dict = self._collect(self._fused_user_args, edge_index,
                                           size, kwargs)
 
-            msg_aggr_kwargs = self.inspector.distribute(
-                'message_and_aggregate', coll_dict)
+            msg_aggr_kwargs = _select_args(self.message_and_aggregate, coll_dict)
             out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
 
         # Otherwise, run both functions in separation.
@@ -927,7 +931,7 @@ class GINConv_mask(gnn.GINConv):
             coll_dict = self._collect(self._user_args, edge_index, size,
                                           kwargs)
 
-            msg_kwargs = self.inspector.distribute('message', coll_dict)
+            msg_kwargs = _select_args(self.message, coll_dict)
             out = self.message(**msg_kwargs)
 
             # For `GNNExplainer`, we require a separate message and aggregate
@@ -952,8 +956,8 @@ class GINConv_mask(gnn.GINConv):
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
-            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+            aggr_kwargs = _select_args(self.aggregate, coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
 
-            update_kwargs = self.inspector.distribute('update', coll_dict)
+            update_kwargs = _select_args(self.update, coll_dict)
             return self.update(out, **update_kwargs)
