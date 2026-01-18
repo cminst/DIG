@@ -88,7 +88,7 @@ def evaluate_accuracy(model, loader, device):
     with torch.no_grad():
         for batch in loader:
             batch = batch.to(device)
-            logits = model(batch)
+        logits = model(batch.x, batch.edge_index, batch.batch)
             loss = F.cross_entropy(logits, batch.y)
             losses.append(loss.item())
             preds = logits.argmax(dim=-1)
@@ -108,7 +108,7 @@ def train_model(model, train_loader, val_loader, device, epochs, lr, weight_deca
         model.train()
         for batch in train_loader:
             batch = batch.to(device)
-            logits = model(batch)
+        logits = model(batch.x, batch.edge_index, batch.batch)
             loss = F.cross_entropy(logits, batch.y)
             optimizer.zero_grad()
             loss.backward()
