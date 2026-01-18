@@ -440,18 +440,23 @@ class PGExplainer(nn.Module):
         else:
             self.edge_mask = edge_mask
 
-        self.edge_mask.to(self.device)
+        self.edge_mask = self.edge_mask.to(self.device)
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
                 module._explain = True
-                module.__edge_mask__ = self.edge_mask
+                # PyG >= 2.5 registers __edge_mask__ as a Parameter; remove to allow Tensor.
+                if "__edge_mask__" in module._parameters:
+                    module._parameters.pop("__edge_mask__", None)
+                object.__setattr__(module, "__edge_mask__", self.edge_mask)
 
     def __clear_masks__(self):
         """ clear the edge weights to None, and set the explain flag to :obj:`False` """
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
                 module._explain = False
-                module.__edge_mask__ = None
+                if "__edge_mask__" in module._parameters:
+                    module._parameters.pop("__edge_mask__", None)
+                object.__setattr__(module, "__edge_mask__", None)
         self.edge_mask = None
 
     def update_num_hops(self, num_hops: int):
