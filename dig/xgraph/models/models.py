@@ -359,7 +359,10 @@ class GCNConv(gnn.GCNConv):
         return out
 
     def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
+        if hasattr(self, "_check_input"):
+            size = self._check_input(edge_index, size)
+        else:
+            size = self.__check_input__(edge_index, size)
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
@@ -496,7 +499,10 @@ class GINConv(gnn.GINConv):
         return x_j * self.edge_weight.view(-1, 1)
 
     def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
+        if hasattr(self, "_check_input"):
+            size = self._check_input(edge_index, size)
+        else:
+            size = self.__check_input__(edge_index, size)
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
@@ -758,7 +764,10 @@ class GCNConv_mask(gnn.GCNConv):
         return out
 
     def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
+        if hasattr(self, "_check_input"):
+            size = self._check_input(edge_index, size)
+        else:
+            size = self.__check_input__(edge_index, size)
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
@@ -895,7 +904,10 @@ class GINConv_mask(gnn.GINConv):
         return x_j * self.edge_weight.view(-1, 1)
 
     def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
+        if hasattr(self, "_check_input"):
+            size = self._check_input(edge_index, size)
+        else:
+            size = self.__check_input__(edge_index, size)
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
