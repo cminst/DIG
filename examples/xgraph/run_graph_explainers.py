@@ -87,7 +87,7 @@ DATASET_DEFAULTS: Dict[str, Dict] = {
             "gnn_dropout": 0.0,
             "gnn_emb_normalization": False,
             "gcn_adj_normalization": False,
-            "add_self_loop": True,
+            "add_self_loop": False,
             "gnn_nonlinear": "relu",
             "readout": "mean",
             "concate": False,
