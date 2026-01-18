@@ -108,7 +108,7 @@ class SentiGraphDataset(InMemoryDataset):
     def __init__(self, root, name, transform=None, pre_transform=undirected_graph):
         self.name = name
         super(SentiGraphDataset, self).__init__(root, transform, pre_transform)
-        self.data, self.slices, self.supplement = torch.load(self.processed_paths[0])
+        self.data, self.slices, self.supplement = torch.load(self.processed_paths[0], weights_only=False)
 
     @property
     def raw_dir(self):

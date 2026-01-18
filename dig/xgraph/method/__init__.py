@@ -6,6 +6,7 @@ from .gradcam import GradCAM
 from .pgexplainer import PGExplainer
 from .subgraphx import SubgraphX, MCTS
 from .flowx import FlowX
+from .lacore import LaCoreExplainer
 
 __all__ = [
     'DeepLIFT',
@@ -17,4 +18,5 @@ __all__ = [
     'MCTS',
     'SubgraphX',
     'FlowX',
+    'LaCoreExplainer',
 ]
