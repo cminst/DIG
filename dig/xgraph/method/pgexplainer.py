@@ -569,6 +569,8 @@ class PGExplainer(nn.Module):
             edge_mask (:obj:`torch.Tensor`): The probability mask for graph edges
         """
         node_idx = kwargs.get('node_idx')
+        if embed.device != edge_index.device:
+            embed = embed.to(edge_index.device)
         nodesize = embed.shape[0]
         if self.explain_graph:
             col, row = edge_index
