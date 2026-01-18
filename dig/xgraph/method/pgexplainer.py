@@ -624,7 +624,7 @@ class PGExplainer(nn.Module):
                 self.model.eval()
                 emb_dict = {}
                 ori_pred_dict = {}
-                for gid in tqdm.tqdm(dataset_indices):
+                for gid in tqdm.tqdm(dataset_indices, ncols=50):
                     data = dataset[gid].to(self.device)
                     logits = self.model(data.x, data.edge_index)
                     emb = self.model.get_emb(data.x, data.edge_index)
@@ -640,7 +640,7 @@ class PGExplainer(nn.Module):
                 self.elayers.train()
                 optimizer.zero_grad()
                 tic = time.perf_counter()
-                for gid in tqdm.tqdm(dataset_indices):
+                for gid in tqdm.tqdm(dataset_indices, ncols=50):
                     data = dataset[gid]
                     data.to(self.device)
                     prob, edge_mask = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
@@ -661,7 +661,7 @@ class PGExplainer(nn.Module):
                 explain_node_index_list = torch.where(data.train_mask)[0].tolist()
                 pred_dict = {}
                 logits = self.model(data.x, data.edge_index)
-                for node_idx in tqdm.tqdm(explain_node_index_list):
+                for node_idx in tqdm.tqdm(explain_node_index_list, ncols=50):
                     pred_dict[node_idx] = logits[node_idx].argmax(-1).item()
 
             # train the mask generator
@@ -672,7 +672,7 @@ class PGExplainer(nn.Module):
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
                 tic = time.perf_counter()
-                for iter_idx, node_idx in tqdm.tqdm(enumerate(explain_node_index_list)):
+                for iter_idx, node_idx in tqdm.tqdm(enumerate(explain_node_index_list), ncols=50):
                     with torch.no_grad():
                         x, edge_index, y, subset, _ = \
                             self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
