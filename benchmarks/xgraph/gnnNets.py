@@ -209,7 +209,7 @@ class GCNConv(GCNConv):
         return out
 
     def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
+        size = self._check_input(edge_index, size)
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
@@ -226,8 +226,7 @@ class GCNConv(GCNConv):
 
         # Otherwise, run both functions in separation.
         elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self.__collect__(self.__user_args__, edge_index, size,
-                                         kwargs)
+            coll_dict = self._collect(self._user_args, edge_index, size, kwargs)
 
             msg_kwargs = self.inspector.distribute('message', coll_dict)
             out = self.message(**msg_kwargs)

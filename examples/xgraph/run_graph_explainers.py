@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import argparse
+import os
+import sys
 import copy
 import os
 import random
@@ -18,6 +20,10 @@ from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method import GNNExplainer, PGExplainer, SubgraphX, LaCoreExplainer
 from dig.xgraph.method.base_explainer import ExplainerBase
 from dig.xgraph.method.subgraphx import find_closest_node_result
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
 from benchmarks.xgraph.gnnNets import GCNNet
 
 
